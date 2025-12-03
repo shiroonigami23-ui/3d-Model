@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ProModel Studio | Ultimate Edition</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="app-layout">
+        
+        <aside class="sidebar left" id="leftSidebar">
+            <div class="logo-area">
+                <div class="logo-icon">💠</div>
+                <div class="logo-text">ProModel <span>ULTIMATE</span></div>
+            </div>
+
+            <div class="scroll-area">
+                <div class="panel-section highlight-section">
+                    <div class="section-title">📂 3D Asset Library</div>
+                    <div style="font-size: 0.7rem; color:#888; margin-bottom:5px;">
+                        Status: <span id="libStatus" style="color:#fbbf24">Initializing...</span>
+                    </div>
+                    <select id="assetSelect" class="select-input" style="margin-bottom:10px; height:35px;">
+                        <option value="">-- Loading Library... --</option>
+                    </select>
+                    <button class="btn primary" id="btnLoadAsset">⬇ Load Selected Model</button>
+                    <input type="text" id="assetSearch" class="select-input" placeholder="🔍 Search assets..." style="margin-top:5px; display:none;">
+                </div>
+
+                <div class="panel-section">
+                    <div class="section-title">AI Mesh Generator</div>
+                    <label class="drop-zone" id="dropZone">
+                        <div class="icon">📸</div>
+                        <div>Upload Image</div>
+                        <input type="file" id="imageInput" hidden accept="image/*">
+                    </label>
+                    <div class="prop-row" style="margin-top: 10px;">
+                        <label>AI Mode:</label>
+                        <select id="genMode" class="select-input">
+                            <option value="human">Human (Soft Relief)</option>
+                            <option value="standard">Standard (Hard Edge)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <div class="section-title">⚡ Action Engine</div>
+                    <div class="grid-2col">
+                        <button class="action-btn active" data-action="idle">🧍 Idle</button>
+                        <button class="action-btn" data-action="walk">🚶 Walk</button>
+                        <button class="action-btn" data-action="run">🏃 Run</button>
+                        <button class="action-btn" data-action="fight">🥊 Fight</button>
+                        <button class="action-btn" data-action="shake">🤝 Shake</button>
+                        <button class="action-btn" data-action="vibe">🎧 Vibe</button>
+                    </div>
+                    
+                    <div class="section-title" style="margin-top:15px">🎭 Mood / Emotion</div>
+                    <div class="mood-grid">
+                        <button class="mood-btn" data-mood="happy" title="Happy">😊</button>
+                        <button class="mood-btn" data-mood="angry" title="Angry">😡</button>
+                        <button class="mood-btn" data-mood="sad" title="Sad">😢</button>
+                        <button class="mood-btn" data-mood="cool" title="Cool">😎</button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <div class="section-title">World & Lighting</div>
+                    <div class="grid-2col">
+                        <button class="env-btn active" data-env="studio">Studio</button>
+                        <button class="env-btn" data-env="neon">Neon</button>
+                        <button class="env-btn" data-env="space">Space</button>
+                        <button class="env-btn" data-env="void">Void</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="viewport">
+            <canvas id="canvas"></canvas>
+            
+            <div class="overlay-ui">
+                <div class="action-status" id="actionStatus">MODE: IDLE</div>
+            </div>
+
+            <div class="toolbar">
+                <button class="tool-btn active" id="toolSelect">↖</button>
+                <button class="tool-btn" id="toolMove">↔</button>
+                <button class="tool-btn" id="toolRotate">↻</button>
+                <button class="tool-btn" id="toolScale">⤡</button>
+                <div class="divider"></div>
+                <button class="tool-btn" id="viewWire">🕸️</button>
+                <button class="tool-btn" id="viewGrid">#</button>
+            </div>
+
+            <div class="timeline-bar">
+                <button class="play-btn" id="btnPlayAnim">▶</button>
+                <div class="timeline-track">
+                    <div class="control-group-inline" style="flex:1">
+                        <label>Speed:</label>
+                        <input type="range" id="animSpeed" min="0.1" max="3.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="control-group-inline">
+                        <label>Cam:</label>
+                        <select id="camAnim" class="select-small">
+                            <option value="static">Static</option>
+                            <option value="cinematic">Cinematic</option>
+                        </select>
+                    </div>
+                    <div class="recording-indicator" id="recIndicator">● REC</div>
+                </div>
+            </div>
+
+            <div class="loader" id="loader">
+                <div class="spinner"></div>
+                <div class="loader-text">Processing...</div>
+            </div>
+        </main>
+
+        <aside class="sidebar right" id="rightSidebar">
+            <div class="panel-header">Properties</div>
+
+            <div class="scroll-area">
+                <div class="panel-section">
+                    <div class="section-title">Scene Graph</div>
+                    <div class="scene-list" id="sceneList">
+                        <div style="padding:10px; color:#555;">Scene Empty</div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <div class="section-title">Project Memory</div>
+                    <div class="btn-grid">
+                        <button class="btn" id="btnSave">💾 Save JSON</button>
+                        <button class="btn" id="btnLoad">📂 Load JSON</button>
+                        <input type="file" id="projectLoader" hidden accept=".json">
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <div class="section-title">Geometry Modifiers</div>
+                    <div class="btn-grid">
+                        <button class="btn" id="btnTwist">🌀 Twist</button>
+                        <button class="btn" id="btnTaper">🔺 Taper</button>
+                        <button class="btn" id="btnFlip">🔄 Flip</button>
+                        <button class="btn" id="btnDuplicate">📑 Clone</button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <div class="section-title">Material & Tweaks</div>
+                    <div class="prop-row">
+                        <label>Height Depth</label>
+                        <input type="range" id="geomHeight" min="0.1" max="10" step="0.1">
+                    </div>
+                    <div class="prop-row">
+                        <label>Base Color</label>
+                        <input type="color" id="matColor" class="color-picker">
+                    </div>
+                    <div class="prop-row">
+                        <label>Roughness</label>
+                        <input type="range" id="matRough" min="0" max="1" step="0.01">
+                    </div>
+                    <div class="prop-row">
+                        <label>Metalness</label>
+                        <input type="range" id="matMetal" min="0" max="1" step="0.01">
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <div class="section-title">Export / Render</div>
+                    <button class="btn primary" id="btnRecordVideo">🔴 Record 4K Video</button>
+                    <div class="btn-grid" style="margin-top:5px">
+                        <button class="btn" id="exportGlb">💾 GLB</button>
+                        <button class="btn" id="exportObj">💾 OBJ</button>
+                        <button class="btn" id="exportStl">🖨️ STL</button>
+                        <button class="btn" id="btnScreenshot">📸 IMG</button>
+                    </div>
+                    <button class="btn" id="btnReset" style="margin-top:10px">↺ Reset Transform</button>
+                    <button class="btn danger" id="btnDelete" style="margin-top:10px">🗑️ Delete Selected</button>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
