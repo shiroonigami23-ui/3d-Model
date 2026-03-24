@@ -1,0 +1,37 @@
+name: Android Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x android-app/gradlew
+
+      - name: Build release APK
+        working-directory: android-app
+        run: ./gradlew assembleRelease
+
+      - name: Attach APK to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: android-app/app/build/outputs/apk/release/app-release*.apk
