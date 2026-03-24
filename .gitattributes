@@ -1,0 +1,7 @@
+# Legacy web viewer is retained but excluded from language-share metrics.
+app.js linguist-vendored
+index.html linguist-vendored
+style.css linguist-vendored
+
+# Static model binaries/datasets.
+assets/** linguist-vendored

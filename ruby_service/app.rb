@@ -2,6 +2,8 @@ require "json"
 require "sinatra/base"
 require "sinatra/json"
 require_relative "lib/model_catalog"
+require_relative "lib/model_validator"
+require_relative "lib/model_ranker"
 
 module ModelVault
   class App < Sinatra::Base
@@ -45,6 +47,24 @@ module ModelVault
       model = settings.catalog.models.find { |m| m["id"] == id }
       halt 404, json(error: "model_not_found", id: id) unless model
       json(model: model)
+    end
+
+    get "/api/models/top/size" do
+      limit = params.fetch("limit", "20").to_i
+      ranker = ModelRanker.new(settings.catalog.models)
+      json(results: ranker.top_by_size(limit: limit))
+    end
+
+    get "/api/models/top/name" do
+      limit = params.fetch("limit", "20").to_i
+      ranker = ModelRanker.new(settings.catalog.models)
+      json(results: ranker.top_by_name_score(limit: limit))
+    end
+
+    get "/api/models/validate" do
+      validator = ModelValidator.new
+      errors = validator.validate_all(settings.catalog.models)
+      json(ok: errors.empty?, errors: errors)
     end
 
     post "/api/reindex" do
